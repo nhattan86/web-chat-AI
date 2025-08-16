@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Chatbot Interface</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
+        :root {
+            --pink: #ff69b4;
+            --blue: #4169e1;
+            --green: #2ecc71;
+            --light-pink: #ffe6f2;
+            --light-blue: #e6f2ff;
+            --light-green: #e6fff2;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, var(--light-pink), var(--light-blue), var(--light-green));
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        h1 {
+            color: var(--blue);
+            text-align: center;
+            font-size: 3rem;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .chat-interface {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .input-section, .output-section {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease;
+        }
+
+        .input-section:hover, .output-section:hover {
+            transform: translateY(-5px);
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            color: var(--blue);
+            font-weight: 600;
+        }
+
+        select, input[type="range"], textarea, button {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 20px;
+            border: 2px solid var(--pink);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--blue);
+            box-shadow: 0 0 0 3px rgba(65, 105, 225, 0.3);
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            height: 10px;
+            background: linear-gradient(to right, var(--pink), var(--blue));
+            outline: none;
+            border: none;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+        }
+
+        input[type="range"]:hover {
+            opacity: 1;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: var(--green);
+            cursor: pointer;
+            border-radius: 50%;
+        }
+
+        button {
+            background-color: var(--blue);
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            background-color: var(--pink);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        #response {
+            white-space: pre-wrap;
+            background-color: var(--light-blue);
+            padding: 20px;
+            border-radius: 8px;
+            min-height: 200px;
+            max-height: 400px;
+            overflow-y: auto;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            border-left: 5px solid var(--blue);
+        }
+
+        .token-count {
+            font-size: 0.9rem;
+            color: var(--pink);
+            text-align: right;
+            margin-top: 10px;
+            font-weight: 600;
+        }
+
+        .copy-btn {
+            background-color: var(--green);
+            margin-top: 10px;
+        }
+
+        .copy-btn:hover {
+            background-color: #27ae60;
+        }
+
+        #saved-prompts {
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .chat-interface {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Animation */
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        body {
+            background-size: 200% 200%;
+            animation: gradientBG 15s ease infinite;
+        }
+
+        .blinking-cursor::after {
+            content: '|';
+            animation: blink 0.7s infinite;
+        }
+
+        @keyframes blink {
+            0% { opacity: 0; }
+            50% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>AI Chatbot Interface</h1>
+        <div class="chat-interface">
+            <div class="input-section">
+                <label for="model">Select AI Model:</label>
+                <select id="model">
+                    <option value="chatgpt">ChatGPT</option>
+                    <option value="claude">Claude</option>
+                    <option value="gemini">Gemini</option>
+                </select>
+
+                <label for="temperature">Creativity (Temperature): <span id="temp-value">0.5</span></label>
+                <input type="range" id="temperature" min="0" max="1" step="0.1" value="0.5">
+
+                <label for="prompt">Enter your prompt:</label>
+                <textarea id="prompt" rows="5"></textarea>
+
+                <button id="generate">Generate Response</button>
+
+                <button id="copy-prompt" class="copy-btn">Copy Prompt</button>
+                <button id="edit-prompt" class="copy-btn">Edit Prompt</button>
+                <button id="save-prompt" class="copy-btn">Save Prompt</button>
+            </div>
+            <div class="output-section">
+                <div id="response" class="blinking-cursor"></div>
+                <div class="token-count" id="token-count"></div>
+                <button id="copy-response" class="copy-btn">Copy Response</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const modelSelect = document.getElementById('model');
+        const temperatureInput = document.getElementById('temperature');
+        const tempValue = document.getElementById('temp-value');
+        const promptTextarea = document.getElementById('prompt');
+        const generateBtn = document.getElementById('generate');
+        const responseDiv = document.getElementById('response');
+        const tokenCountDiv = document.getElementById('token-count');
+        const copyPromptBtn = document.getElementById('copy-prompt');
+        const copyResponseBtn = document.getElementById('copy-response');
+        const editPromptBtn = document.getElementById('edit-prompt');
+        const savePromptBtn = document.getElementById('save-prompt');
+
+        temperatureInput.addEventListener('input', () => {
+            tempValue.textContent = temperatureInput.value;
+        });
+
+        generateBtn.addEventListener('click', async () => {
+            const model = modelSelect.value;
+            const prompt = promptTextarea.value;
+            const temperature = temperatureInput.value;
+
+            responseDiv.textContent = 'Generating response...';
+            tokenCountDiv.textContent = '';
+
+            try {
+                const response = await fetch('/generate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ model, prompt, temperature }),
+                });
+
+                const data = await response.json();
+
+                if (data.error) {
+                    responseDiv.textContent = `Error: ${data.error}`;
+                } else {
+                    typeWriter(data.text, responseDiv);
+                    tokenCountDiv.textContent = `Tokens used: ${data.tokens}`;
+                }
+            } catch (error) {
+                responseDiv.textContent = `Error: ${error.message}`;
+            }
+        });
+
+        function typeWriter(text, element, index = 0) {
+            if (index < text.length) {
+                element.textContent += text.charAt(index);
+                index++;
+                setTimeout(() => typeWriter(text, element, index), 20);
+            } else {
+                element.classList.remove('blinking-cursor');
+            }
+        }
+
+        copyPromptBtn.addEventListener('click', () => {
+            navigator.clipboard.writeText(promptTextarea.value);
+            showToast('Prompt copied!');
+        });
+
+        copyResponseBtn.addEventListener('click', () => {
+            navigator.clipboard.writeText(responseDiv.textContent);
+            showToast('Response copied!');
+        });
+
+        editPromptBtn.addEventListener('click', () => {
+            promptTextarea.focus();
+        });
+
+        savePromptBtn.addEventListener('click', () => {
+            const prompts = JSON.parse(localStorage.getItem('savedPrompts') || '[]');
+            prompts.push(promptTextarea.value);
+            localStorage.setItem('savedPrompts', JSON.stringify(prompts));
+            showToast('Prompt saved!');
+            updateSavedPromptsDropdown();
+        });
+
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.textContent = message;
+            toast.style.position = 'fixed';
+            toast.style.bottom = '20px';
+            toast.style.left = '50%';
+            toast.style.transform = 'translateX(-50%)';
+            toast.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+            toast.style.color = 'white';
+            toast.style.padding = '10px 20px';
+            toast.style.borderRadius = '5px';
+            toast.style.zIndex = '1000';
+            document.body.appendChild(toast);
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+
+        function updateSavedPromptsDropdown() {
+            const savedPrompts = JSON.parse(localStorage.getItem('savedPrompts') || '[]');
+            let selectPrompt = document.getElementById('saved-prompts');
+
+            if (!selectPrompt) {
+                selectPrompt = document.createElement('select');
+                selectPrompt.id = 'saved-prompts';
+                document.querySelector('.input-section').insertBefore(selectPrompt, promptTextarea);
+            }
+
+            selectPrompt.innerHTML = '<option value="">Select a saved prompt</option>';
+            savedPrompts.forEach((prompt, index) => {
+                selectPrompt.innerHTML += `<option value="${index}">${prompt.substring(0, 30)}...</option>`;
+            });
+
+            selectPrompt.addEventListener('change', (e) => {
+                if (e.target.value !== '') {
+                    promptTextarea.value = savedPrompts[e.target.value];
+                }
+            });
+        }
+
+        updateSavedPromptsDropdown();
+    </script>
+</body>
+</html>
